@@ -26,7 +26,7 @@ function App() {
     fetch('http://localhost:3001/api/evaluations')
       .then(res => res.json())
       .then(data => setMessages(Array.isArray(data) ? data : []))
-      .catch(() => setError('Vibes are BAD, because my API call didn\'t return as expected 💅\n NO LOANS FOR YOU!'))
+      .catch(() => setError('Unable to load evaluations right now.'))
   }, [])
 
   const handleChange = e => {
@@ -75,9 +75,15 @@ function App() {
         body: JSON.stringify(formData),
       })
 
-      const payload = await res.json()
+      const payload = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(payload?.error || 'Failed to submit form data')
+        const detailedError =
+          payload?.details ||
+          payload?.error?.message ||
+          payload?.error ||
+          `Request failed with status ${res.status}`
+
+        throw new Error(detailedError)
       }
 
       setSubmitMessage(`Form data submitted. Outcome: ${payload.outcome || 'Unknown'}`)
@@ -87,7 +93,7 @@ function App() {
       const list = await latest.json()
       setMessages(Array.isArray(list) ? list : [])
     } catch (err) {
-      setError(err.message || 'Vibes are BAD, because my API call didn\'t return as expected 💅\n NO LOANS FOR YOU!')
+      setError(err.message || 'Unable to submit form data')
     } finally {
       setLoading(false)
     }
@@ -100,10 +106,10 @@ function App() {
       <h1>Vibes-Based Lending Co.</h1>
       <form onSubmit={handleSubmit}>
         <p>
-          <input name="firstName" placeholder="First name" value={formData.firstName} onChange={handleChange} required />
+          <input name="firstName" placeholder="First name" value={formData.firstName} onChange={handleChange} />
         </p>
         <p>
-          <input name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleChange} required />
+          <input name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleChange} />
         </p>
         <p>
           <input name="addressLine1" placeholder="Address line 1" value={formData.addressLine1} onChange={handleChange} required />
@@ -112,25 +118,25 @@ function App() {
           <input name="addressLine2" placeholder="Address line 2 (optional)" value={formData.addressLine2} onChange={handleChange} />
         </p>
         <p>
-          <input name="city" placeholder="City" value={formData.city} onChange={handleChange} required />
+          <input name="city" placeholder="City" value={formData.city} onChange={handleChange} />
         </p>
         <p>
-          <input name="state" placeholder="State (2 letters)" value={formData.state} onChange={handleChange} minLength={2} maxLength={2} pattern="[A-Za-z]{2}" required />
+          <input name="state" placeholder="State (2 letters)" value={formData.state} onChange={handleChange} minLength={2} maxLength={2} pattern="[A-Za-z]{2}" />
         </p>
         <p>
-          <input name="zip" placeholder="ZIP code" value={formData.zip} onChange={handleChange} required />
+          <input name="zip" placeholder="ZIP code" value={formData.zip} onChange={handleChange} />
         </p>
         <p>
           <input name="country" placeholder="Country code (e.g. US)" value={formData.country} onChange={handleChange} minLength={2} maxLength={2} pattern="[A-Za-z]{2}" required />
         </p>
         <p>
-          <input name="ssn" placeholder="SSN (9 digits)" value={formData.ssn} onChange={handleChange} inputMode="numeric" minLength={9} maxLength={9} pattern="\d{9}" required />
+          <input name="ssn" placeholder="SSN (9 digits)" value={formData.ssn} onChange={handleChange} inputMode="numeric" minLength={9} maxLength={9} pattern="\d{9}" />
         </p>
         <p>
           <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
         </p>
         <p>
-          <input name="dob" type="text" placeholder="Date of birth (YYYY-MM-DD)" value={formData.dob} onChange={handleChange} inputMode="numeric" maxLength={10} pattern="\d{4}-\d{2}-\d{2}" required />
+          <input name="dob" type="text" placeholder="Date of birth (YYYY-MM-DD)" value={formData.dob} onChange={handleChange} inputMode="numeric" maxLength={10} pattern="\d{4}-\d{2}-\d{2}" />
         </p>
         <button type="submit" disabled={loading}>
           {loading ? 'Submitting' : 'Submit form data'}

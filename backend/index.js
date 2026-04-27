@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 const pseudoDb = [];
+let hasLoggedEvalShape = false;
 
 function getAuthorizationHeader() {
     const encodedCredentials = Buffer.from(`${process.env.WORKFLOW_TOKEN}:${process.env.WORKFLOW_SECRET}`).toString("base64");
@@ -65,8 +66,17 @@ app.post("/api/evaluations", async (req, res) => {
         }
 
         const evalData = await evalResponse.json();
+        if (!hasLoggedEvalShape) {
+            // Temporary diagnostic logging to confirm Alloy response shape.
+            console.log("Alloy evaluation response shape:", JSON.stringify(evalData, null, 2));
+            hasLoggedEvalShape = true;
+        }
 
-        const outcome = evalData?.summary?.outcome || "Unknown";
+        const outcome =
+            evalData?.summary?.outcome ||
+            evalData?.summary?.result ||
+            evalData?.outcome ||
+            "Unknown";
 
         const submission = {
             id: Date.now().toString(),
