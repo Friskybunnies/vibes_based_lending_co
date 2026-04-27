@@ -1,7 +1,7 @@
 .wrap {
   position: relative;
   width: 100%;
-  max-width: 22rem;
+  max-width: min(50rem, 100%);
   margin: 0 auto;
   padding: 1.25rem 1.35rem 1.35rem;
   background: var(--surface);

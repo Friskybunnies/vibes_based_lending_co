@@ -26,7 +26,7 @@ body {
 
 #root {
   min-height: 100svh;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem max(0.75rem, 2vw);
   display: flex;
   justify-content: center;
   align-items: flex-start;
