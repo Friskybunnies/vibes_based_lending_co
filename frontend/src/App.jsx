@@ -31,8 +31,16 @@ function App() {
 
   const handleChange = e => {
     const { name, value } = e.target
-    const normalizedValue =
-      name === 'state' || name === 'country' ? value.toUpperCase() : value
+    let normalizedValue = value
+
+    if (name === 'state' || name === 'country') {
+      normalizedValue = value.toUpperCase()
+    }
+
+    if (name === 'dob') {
+      normalizedValue = value.replace(/[^\d-]/g, '').slice(0, 10)
+    }
+
     setFormData(prev => ({ ...prev, [name]: normalizedValue }))
   }
 
@@ -122,7 +130,7 @@ function App() {
           <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
         </p>
         <p>
-          <input name="dob" type="date" placeholder="Date of birth" value={formData.dob} pattern="\d{4}-\d{2}-\d{2}" required />
+          <input name="dob" type="text" placeholder="Date of birth (YYYY-MM-DD)" value={formData.dob} onChange={handleChange} inputMode="numeric" maxLength={10} pattern="\d{4}-\d{2}-\d{2}" required />
         </p>
         <button type="submit" disabled={loading}>
           {loading ? 'Submitting' : 'Submit form data'}
