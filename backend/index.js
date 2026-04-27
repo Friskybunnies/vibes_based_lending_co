@@ -64,12 +64,18 @@ app.post("/api/evaluations", async (req, res) => {
     }
 });
 
+/* 
+This section exists pecifically for Docker and Railway, 
+given that a Vite process for serving the React front end only exists in dev, 
+and the onus in production falls back to the server to serve the front end 
+*/
+
 const dist = path.join(__dirname, "../frontend/dist");
 const indexHtml = path.join(dist, "index.html");
 app.use(express.static(dist, { index: "index.html" }));
 app.use((req, res) => {
-    if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
-    if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
+    // if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
+    // if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
     res.sendFile(indexHtml);
 });
 
