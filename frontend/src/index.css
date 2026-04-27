@@ -12,6 +12,11 @@
   --ring: #ffffff;
   --accent: #38bdf8;
   --accent-dim: #0c4a6e;
+  /* primary page title */
+  --text-heading: #dcdce2;
+  /* form labels / h2–h3 */
+  --text-header-secondary: #2ef0ff;
+  --text-header-secondary-glow: rgba(46, 240, 255, 0.4);
 
   font: 16px/1.5 "Inter", system-ui, -apple-system, sans-serif;
   font-feature-settings: "ss01" on, "cv02" on;
@@ -40,9 +45,16 @@ h1 {
   font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  color: var(--text);
+  color: var(--text-heading);
   margin: 0 0 1rem;
   text-align: center;
+}
+
+h2,
+h3 {
+  color: var(--text-header-secondary);
+  text-shadow: 0 0 20px var(--text-header-secondary-glow);
+  letter-spacing: -0.02em;
 }
 
 p {

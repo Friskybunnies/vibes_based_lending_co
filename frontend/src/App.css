@@ -23,7 +23,8 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-dim);
+  color: var(--text-header-secondary);
+  text-shadow: 0 0 16px var(--text-header-secondary-glow);
   margin-bottom: 0.15rem;
 }
 
