@@ -1,15 +1,15 @@
-require("dotenv").config();
+import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import cors from "cors";
+import express from "express";
 
-const path = require("path");
-const fs = require("fs");
-const express = require("express");
-const cors = require("cors");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",").map(s => s.trim()) : true }));
 app.use(express.json());
-
-const store = [];
 
 app.get("/api/health", (req, res) => {
     res.json({ ok: true });
@@ -55,17 +55,16 @@ app.post("/api/evaluations", async (req, res) => {
         const raw =
             data.summary?.outcome ?? data.summary?.result ?? data.outcome ?? "Unknown";
         const outcome = typeof raw === "string" ? raw.trim() : String(raw);
-        const row = { id: String(Date.now()), formContents: body, outcome, createdAt: new Date().toISOString() };
-        store.push(row);
-        res.json(row);
+        res.json({
+            id: String(Date.now()),
+            formContents: body,
+            outcome,
+            createdAt: new Date().toISOString(),
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error", details: err.message });
     }
-});
-
-app.get("/api/evaluations", (req, res) => {
-    res.json(store);
 });
 
 const dist = path.join(__dirname, "../frontend/dist");

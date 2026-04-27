@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import partnerImg from './assets/official-lender.png'
+import partnerImg from './static/official-lender.png'
 
 function Shell({ children }) {
   return (
@@ -150,9 +150,6 @@ export default function App() {
           </div>
           <div className="row">
             <label>Last name <input name="lastName" value={form.lastName} onChange={onChange} required /></label>
-            <span className="hint">
-              {`Sandbox personas: last name Review → outcome "Manual Review"; last name Deny → outcome "Denied".`}
-            </span>
           </div>
           <div className="row">
             <label>Line 1 <input name="addressLine1" value={form.addressLine1} onChange={onChange} required /></label>
@@ -165,17 +162,17 @@ export default function App() {
           </div>
           <div className="row">
             <label>State <input name="state" value={form.state} onChange={onChange} minLength={2} maxLength={2} required /></label>
-            <span className="hint">2 letters, e.g. NY. We uppercase for you.</span>
+            <span className="hint">2 letters, e.g. NY.</span>
           </div>
           <div className="row">
             <label>ZIP <input name="zip" value={form.zip} onChange={onChange} required /></label>
           </div>
           <div className="row">
             <label>
-              Country{' '}
+              Country
               <input name="country" value={form.country} onChange={onChange} required />
             </label>
-            <span className="hint">Must be US (fixed).</span>
+            <span className="hint">Must be US.</span>
           </div>
           <div className="row">
             <label>SSN <input name="ssn" value={form.ssn} onChange={onChange} inputMode="numeric" minLength={9} maxLength={9} required /></label>
@@ -186,14 +183,13 @@ export default function App() {
           </div>
           <div className="row">
             <label>
-              Date of Birth{' '}
+              Date of Birth
               <input
                 name="dob"
                 value={form.dob}
                 onChange={onChange}
                 inputMode="numeric"
                 maxLength={10}
-                placeholder=""
                 required
               />
             </label>

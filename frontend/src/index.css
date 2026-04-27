@@ -1,6 +1,5 @@
 :root {
   color-scheme: dark;
-  /* near-black + crisp separation */
   --bg: #020203;
   --bg-elevated: #08080a;
   --surface: #0c0c0f;
@@ -9,17 +8,12 @@
   --text: #fafafa;
   --text-dim: #a1a1aa;
   --text-muted: #71717a;
-  --ring: #ffffff;
   --accent: #38bdf8;
-  --accent-dim: #0c4a6e;
-  /* primary page title */
   --text-heading: #dcdce2;
-  /* form labels / h2–h3 */
   --text-header-secondary: #2ef0ff;
   --text-header-secondary-glow: rgba(46, 240, 255, 0.4);
 
-  font: 16px/1.5 "Inter", system-ui, -apple-system, sans-serif;
-  font-feature-settings: "ss01" on, "cv02" on;
+  font: 16px/1.5 "Proxima Nova", system-ui, -apple-system, sans-serif;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -35,10 +29,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  /* subtle cool vignette */
-  background:
-    radial-gradient(120% 80% at 50% -20%, rgba(56, 189, 248, 0.12), transparent 50%),
-    var(--bg);
 }
 
 h1 {
@@ -48,13 +38,6 @@ h1 {
   color: var(--text-heading);
   margin: 0 0 1rem;
   text-align: center;
-}
-
-h2,
-h3 {
-  color: var(--text-header-secondary);
-  text-shadow: 0 0 20px var(--text-header-secondary-glow);
-  letter-spacing: -0.02em;
 }
 
 p {
@@ -81,19 +64,5 @@ input:hover {
 input:focus {
   border-color: var(--accent);
   outline: 2px solid var(--bg);
-  outline-offset: 0;
   box-shadow: 0 0 0 2px var(--accent);
-}
-
-input:read-only {
-  opacity: 0.92;
-  cursor: default;
-}
-
-input:read-only:hover {
-  border-color: var(--border);
-}
-
-input::placeholder {
-  color: var(--text-muted);
 }
