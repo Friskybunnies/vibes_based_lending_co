@@ -19,6 +19,9 @@ app.post("/api/evaluations", async (req, res) => {
     try {
         const body = req.body;
         if (!body) return res.status(400).json({ error: "Missing body" });
+        if (body.country !== "US") {
+            return res.status(400).json({ error: "Country must be US" });
+        }
 
         const t = process.env.WORKFLOW_TOKEN;
         const s = process.env.WORKFLOW_SECRET;
@@ -49,7 +52,9 @@ app.post("/api/evaluations", async (req, res) => {
         }
 
         const data = await r.json();
-        const outcome = data.summary?.outcome || data.summary?.result || data.outcome || "Unknown";
+        const raw =
+            data.summary?.outcome ?? data.summary?.result ?? data.outcome ?? "Unknown";
+        const outcome = typeof raw === "string" ? raw.trim() : String(raw);
         const row = { id: String(Date.now()), formContents: body, outcome, createdAt: new Date().toISOString() };
         store.push(row);
         res.json(row);

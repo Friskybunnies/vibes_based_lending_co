@@ -16,7 +16,7 @@ cd backend && npm install && node index.js
 cd frontend && npm install && npm run dev
 ```
 
-Open **http://localhost:5173**; the API is **:3001**. Override the API with `VITE_API_URL` in `frontend/.env` if you need to (see `frontend/.env.example`).
+Open **http://localhost:5173**; the API is **:3001**. Override the API with `VITE_API_URL` in `frontend/.env` if you need to (see `frontend/.env.example`). **Country** is fixed to **US**.
 
 **Built UI only:** `cd frontend && npm run build`, then from the repo root `node backend/index.js` (same env as above; serves on `PORT` or 3001).
 
