@@ -11,10 +11,24 @@ app.use(express.json());
 const pseudoDb = [];
 
 function getAuthorizationHeader() {
-    const { WORKFLOW_TOKEN, WORKFLOW_SECRET } = process.env;
-
-    const encodedCredentials = Buffer.from(`${WORKFLOW_TOKEN}:${WORKFLOW_SECRET}`).toString("base64");
+    const encodedCredentials = Buffer.from(`${process.env.WORKFLOW_TOKEN}:${process.env.WORKFLOW_SECRET}`).toString("base64");
     return `Basic ${encodedCredentials}`;
+}
+
+function formData(formContents) {
+    return {
+        name_first: formContents.firstName,
+        name_last: formContents.lastName,
+        address_line_1: formContents.addressLine1,
+        address_line_2: formContents.addressLine2,
+        address_city: formContents.city,
+        address_state: formContents.state,
+        address_postal_code: formContents.zip,
+        address_country_code: formContents.country,
+        document_ssn: formContents.ssn,
+        email_address: formContents.email,
+        birth_date: formContents.dob
+    };
 }
 
 app.get("/api/health", (req, res) => {
@@ -24,11 +38,11 @@ app.get("/api/health", (req, res) => {
 app.post("/api/evaluations", async (req, res) => {
     try {
         const formContents = req.body;
-        const authorizationHeader = getAuthorizationHeader();
-
         if (!formContents) {
             return res.status(400).json({ error: "Form contents are required" });
         }
+        const authorizationHeader = getAuthorizationHeader();
+        const payload = formData(formContents);
 
         const evalResponse = await fetch(
             "https://sandbox.alloy.co/v1/evaluations",
@@ -38,7 +52,7 @@ app.post("/api/evaluations", async (req, res) => {
                     "Authorization": authorizationHeader,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(formContents),
+                body: JSON.stringify(payload),
             }
         );
 
