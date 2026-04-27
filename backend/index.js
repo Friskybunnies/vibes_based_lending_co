@@ -68,7 +68,7 @@ app.post("/api/evaluations", async (req, res) => {
         const evalData = await evalResponse.json();
         if (!hasLoggedEvalShape) {
             // Temporary diagnostic logging to confirm Alloy response shape.
-            console.log("Alloy evaluation response shape:", JSON.stringify(evalData, null, 2));
+            console.log("Evaluation response shape:", JSON.stringify(evalData, null, 2));
             hasLoggedEvalShape = true;
         }
 
