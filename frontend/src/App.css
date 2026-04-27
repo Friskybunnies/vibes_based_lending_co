@@ -1,1 +1,41 @@
+.wrap {
+  max-width: 24rem;
+  margin: 0 auto;
+  padding: 0 0.75rem;
+  text-align: left;
+}
 
+.result {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--text-h, #333);
+  border-radius: 6px;
+}
+
+.result.ok { border-color: #22c55e; }
+.result.wait { border-color: #ca8a04; }
+.result.bad { border-color: #dc2626; }
+
+.result .big {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--text-h, inherit);
+}
+
+.result p { margin: 0; }
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--text-h, #999);
+  background: transparent;
+  color: var(--text-h, inherit);
+  cursor: pointer;
+}
+
+.err {
+  color: #f87171;
+  margin-top: 0.75rem;
+}

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './App.css'
 
-const blankForm = {
+const empty = {
   firstName: '',
   lastName: '',
   addressLine1: '',
@@ -15,149 +15,176 @@ const blankForm = {
   dob: '',
 }
 
+const api = 'http://localhost:3001'
+
 function App() {
-  const [messages, setMessages] = useState([])
-  const [formData, setFormData] = useState(blankForm)
+  const [form, setForm] = useState(empty)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [showResult, setShowResult] = useState(false)
+  const [outcome, setOutcome] = useState('')
 
-  useEffect(() => {
-    fetch('http://localhost:3001/api/evaluations')
-      .then(res => res.json())
-      .then(data => setMessages(Array.isArray(data) ? data : []))
-      .catch(() => setError('Unable to load evaluations right now.'))
-  }, [])
-
-  const handleChange = e => {
+  function onChange(e) {
     const { name, value } = e.target
-    let normalizedValue = value
-
-    if (name === 'state' || name === 'country') {
-      normalizedValue = value.toUpperCase()
-    }
-
-    if (name === 'dob') {
-      normalizedValue = value.replace(/[^\d-]/g, '').slice(0, 10)
-    }
-
-    setFormData(prev => ({ ...prev, [name]: normalizedValue }))
+    let v = value
+    if (name === 'state' || name === 'country') v = value.toUpperCase()
+    if (name === 'dob') v = value.replace(/[^\d-]/g, '').slice(0, 10)
+    setForm(f => ({ ...f, [name]: v }))
   }
 
-  const handleSubmit = async e => {
+  async function onSubmit(e) {
     e.preventDefault()
     setError('')
-    setSubmitMessage('')
-    if (!/^[A-Za-z]{2}$/.test(formData.state)) {
-      setError('State must be a 2-letter code (e.g. \'CA\')')
+    if (!/^[A-Za-z]{2}$/.test(form.state)) {
+      setError('State: 2 letters (e.g. NY)')
       return
     }
-    if (!/^[A-Za-z]{2}$/.test(formData.country)) {
-      setError('Country must be a 2-letter code (e.g. \'US\')')
+    if (!/^[A-Za-z]{2}$/.test(form.country)) {
+      setError('Country: 2 letters (e.g. US)')
       return
     }
-    if (!/^\d{9}$/.test(formData.ssn)) {
-      setError('SSN must be exactly 9 digits')
+    if (!/^\d{9}$/.test(form.ssn)) {
+      setError('SSN: 9 digits')
       return
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.dob)) {
-      setError('Date of birth must be in ISO 8601 format (YYYY-MM-DD)')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.dob)) {
+      setError('DOB: YYYY-MM-DD')
       return
     }
 
-    setLoading(true)
+    setBusy(true)
     try {
-      const res = await fetch('http://localhost:3001/api/evaluations', {
+      const res = await fetch(`${api}/api/evaluations`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       })
-
-      const payload = await res.json().catch(() => null)
+      const data = await res.json().catch(() => null)
       if (!res.ok) {
-        const detailedError =
-          payload?.details ||
-          payload?.error?.message ||
-          payload?.error ||
-          `Request failed with status ${res.status}`
-
-        throw new Error(detailedError)
+        throw new Error(
+          data?.details || data?.error?.message || data?.error || `HTTP ${res.status}`
+        )
       }
-
-      setSubmitMessage(`Form data submitted. Outcome: ${payload.outcome || 'Unknown'}`)
-      setFormData(blankForm)
-
-      const latest = await fetch('http://localhost:3001/api/evaluations')
-      const list = await latest.json()
-      setMessages(Array.isArray(list) ? list : [])
+      setOutcome(String(data.outcome ?? ''))
+      setForm(empty)
+      setShowResult(true)
     } catch (err) {
-      setError(err.message || 'Unable to submit form data')
+      setError(err.message || 'Submit failed')
     } finally {
-      setLoading(false)
+      setBusy(false)
     }
   }
 
-  const latestMessage = messages[messages.length - 1]
+  const o = outcome.trim()
+  const approved = /^approved$/i.test(o)
+  const manual = /manual\s*review/i.test(o)
+  const denied = /^denied$/i.test(o)
+
+  if (showResult) {
+    return (
+      <div className="wrap">
+        <h1>Vibes-Based Lending Co.</h1>
+        {approved && (
+          <div className="result ok">
+            <p className="big">Success! 🎉🎉🎉</p>
+            <p>Your account is set up.</p>
+          </div>
+        )}
+        {manual && (
+          <div className="result wait">
+            <p>Thanks for submitting your application, we’ll be in touch shortly.</p>
+          </div>
+        )}
+        {denied && (
+          <div className="result bad">
+            <p>Sorry, your application was not successful.</p>
+          </div>
+        )}
+        {!approved && !manual && !denied && (
+          <div className="result">
+            <p>Outcome: {o || 'Unknown'}</p>
+          </div>
+        )}
+        <p>
+          <button type="button" onClick={() => { setShowResult(false); setOutcome('') }}>
+            New application
+          </button>
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div>
+    <div className="wrap">
       <h1>Vibes-Based Lending Co.</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={onSubmit}>
+        <p><input name="firstName" value={form.firstName} onChange={onChange} placeholder="First name" required /></p>
         <p>
-          <input name="firstName" placeholder="First name" value={formData.firstName} onChange={handleChange} />
+          <input
+            name="lastName"
+            value={form.lastName}
+            onChange={onChange}
+            placeholder="Last name (sandbox: Review or Deny)"
+            required
+          />
+        </p>
+        <p><input name="addressLine1" value={form.addressLine1} onChange={onChange} placeholder="Address line 1" required /></p>
+        <p><input name="addressLine2" value={form.addressLine2} onChange={onChange} placeholder="Address line 2" /></p>
+        <p><input name="city" value={form.city} onChange={onChange} placeholder="City" required /></p>
+        <p>
+          <input
+            name="state"
+            value={form.state}
+            onChange={onChange}
+            placeholder="State"
+            minLength={2}
+            maxLength={2}
+            pattern="[A-Za-z]{2}"
+            required
+          />
+        </p>
+        <p><input name="zip" value={form.zip} onChange={onChange} placeholder="ZIP" required /></p>
+        <p>
+          <input
+            name="country"
+            value={form.country}
+            onChange={onChange}
+            placeholder="Country"
+            minLength={2}
+            maxLength={2}
+            pattern="[A-Za-z]{2}"
+            required
+          />
         </p>
         <p>
-          <input name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleChange} />
+          <input
+            name="ssn"
+            value={form.ssn}
+            onChange={onChange}
+            placeholder="SSN"
+            inputMode="numeric"
+            minLength={9}
+            maxLength={9}
+            pattern="\d{9}"
+            required
+          />
         </p>
+        <p><input name="email" type="email" value={form.email} onChange={onChange} placeholder="Email" required /></p>
         <p>
-          <input name="addressLine1" placeholder="Address line 1" value={formData.addressLine1} onChange={handleChange} required />
+          <input
+            name="dob"
+            value={form.dob}
+            onChange={onChange}
+            placeholder="DOB (YYYY-MM-DD)"
+            inputMode="numeric"
+            maxLength={10}
+            pattern="\d{4}-\d{2}-\d{2}"
+            required
+          />
         </p>
-        <p>
-          <input name="addressLine2" placeholder="Address line 2 (optional)" value={formData.addressLine2} onChange={handleChange} />
-        </p>
-        <p>
-          <input name="city" placeholder="City" value={formData.city} onChange={handleChange} />
-        </p>
-        <p>
-          <input name="state" placeholder="State (2 letters)" value={formData.state} onChange={handleChange} minLength={2} maxLength={2} pattern="[A-Za-z]{2}" />
-        </p>
-        <p>
-          <input name="zip" placeholder="ZIP code" value={formData.zip} onChange={handleChange} />
-        </p>
-        <p>
-          <input name="country" placeholder="Country code (e.g. US)" value={formData.country} onChange={handleChange} minLength={2} maxLength={2} pattern="[A-Za-z]{2}" required />
-        </p>
-        <p>
-          <input name="ssn" placeholder="SSN (9 digits)" value={formData.ssn} onChange={handleChange} inputMode="numeric" minLength={9} maxLength={9} pattern="\d{9}" />
-        </p>
-        <p>
-          <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-        </p>
-        <p>
-          <input name="dob" type="text" placeholder="Date of birth (YYYY-MM-DD)" value={formData.dob} onChange={handleChange} inputMode="numeric" maxLength={10} pattern="\d{4}-\d{2}-\d{2}" />
-        </p>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Submitting' : 'Submit form data'}
-        </button>
+        <button type="submit" disabled={busy}>{busy ? '…' : 'Submit'}</button>
       </form>
-
-      {submitMessage ? <p>{submitMessage}</p> : null}
-
-      {error ? (
-        <p>{error}</p>
-      ) : (
-        <>
-          <p>Total calls: {messages.length}</p>
-          <p>
-            Latest outcome: {latestMessage ? latestMessage.outcome : 'No records yet'}
-          </p>
-          {latestMessage?.createdAt ? (
-            <p>Latest submitted at: {new Date(latestMessage.createdAt).toLocaleString()}</p>
-          ) : null}
-        </>
-      )}
+      {error ? <p className="err">{error}</p> : null}
     </div>
   )
 }

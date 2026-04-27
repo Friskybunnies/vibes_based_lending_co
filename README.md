@@ -3,9 +3,8 @@
 Simple full-stack app using React + Express.
 
 ## What it does
-- Collects applicant info in the React frontend.
-- Sends data to the Express backend for Alloy evaluation.
-- Shows total evaluations and latest outcome in the UI.
+- Form in React → Express → Alloy sandbox.
+- Result screen depends on the evaluation outcome (Approved / Manual Review / Denied).
 
 ## How to run
 
