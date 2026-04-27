@@ -6,35 +6,23 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-
-app.use(
-    cors({
-        origin: process.env.CORS_ORIGIN
-            ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
-            : true
-    })
-);
+app.use(cors({ origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",").map(s => s.trim()) : true }));
 app.use(express.json());
 
 const store = [];
 
-function authHeader() {
-    const t = process.env.WORKFLOW_TOKEN;
-    const s = process.env.WORKFLOW_SECRET;
-    const b64 = Buffer.from(`${t}:${s}`).toString("base64");
-    return `Basic ${b64}`;
-}
-
 app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
+    res.json({ ok: true });
 });
 
 app.post("/api/evaluations", async (req, res) => {
     try {
         const body = req.body;
-        if (!body) {
-            return res.status(400).json({ error: "Form contents are required" });
-        }
+        if (!body) return res.status(400).json({ error: "Missing body" });
+
+        const t = process.env.WORKFLOW_TOKEN;
+        const s = process.env.WORKFLOW_SECRET;
+        const basic = "Basic " + Buffer.from(t + ":" + s).toString("base64");
 
         const payload = {
             name_first: body.firstName,
@@ -50,35 +38,24 @@ app.post("/api/evaluations", async (req, res) => {
             birth_date: body.dob
         };
 
-        const alloyRes = await fetch("https://sandbox.alloy.co/v1/evaluations", {
+        const r = await fetch("https://sandbox.alloy.co/v1/evaluations", {
             method: "POST",
-            headers: {
-                Authorization: authHeader(),
-                "Content-Type": "application/json"
-            },
+            headers: { Authorization: basic, "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
-        if (!alloyRes.ok) {
-            const text = await alloyRes.text();
-            return res.status(502).json({ error: "Request failed", details: text });
+        if (!r.ok) {
+            return res.status(502).json({ error: "Alloy error", details: await r.text() });
         }
 
-        const data = await alloyRes.json();
-        const outcome =
-            data.summary?.outcome || data.summary?.result || data.outcome || "Unknown";
-
-        const row = {
-            id: String(Date.now()),
-            formContents: body,
-            outcome,
-            createdAt: new Date().toISOString()
-        };
+        const data = await r.json();
+        const outcome = data.summary?.outcome || data.summary?.result || data.outcome || "Unknown";
+        const row = { id: String(Date.now()), formContents: body, outcome, createdAt: new Date().toISOString() };
         store.push(row);
         res.json(row);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Internal server error", details: err.message });
+        res.status(500).json({ error: "Server error", details: err.message });
     }
 });
 
@@ -86,21 +63,15 @@ app.get("/api/evaluations", (req, res) => {
     res.json(store);
 });
 
-const distPath = path.join(__dirname, "../frontend/dist");
-if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, "index.html"))) {
-    app.use(express.static(distPath, { index: "index.html" }));
+const dist = path.join(__dirname, "../frontend/dist");
+if (fs.existsSync(path.join(dist, "index.html"))) {
+    app.use(express.static(dist, { index: "index.html" }));
     app.use((req, res) => {
-        if (req.path.startsWith("/api")) {
-            return res.status(404).json({ error: "Not found" });
-        }
-        if (req.method !== "GET" && req.method !== "HEAD") {
-            return res.status(404).end();
-        }
-        res.sendFile(path.join(distPath, "index.html"));
+        if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
+        if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
+        res.sendFile(path.join(dist, "index.html"));
     });
 }
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`);
-});
+const port = process.env.PORT || 3001;
+app.listen(port, () => console.log("on", port));

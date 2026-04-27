@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 
-const empty = {
+const start = {
   firstName: '',
   lastName: '',
   addressLine1: '',
@@ -15,14 +15,13 @@ const empty = {
   dob: '',
 }
 
-// Dev: Vite on 5173, API on 3001. Production (e.g. Railway): same host, use relative /api
 const api = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
-function App() {
-  const [form, setForm] = useState(empty)
+export default function App() {
+  const [form, setForm] = useState(start)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const [showResult, setShowResult] = useState(false)
+  const [done, setDone] = useState(false)
   const [outcome, setOutcome] = useState('')
 
   function onChange(e) {
@@ -37,19 +36,19 @@ function App() {
     e.preventDefault()
     setError('')
     if (!/^[A-Za-z]{2}$/.test(form.state)) {
-      setError('State: 2 letters (e.g. NY)')
+      setError('State should be 2 letters (like NY)')
       return
     }
     if (!/^[A-Za-z]{2}$/.test(form.country)) {
-      setError('Country: 2 letters (e.g. US)')
+      setError('Country should be 2 letters (like US)')
       return
     }
     if (!/^\d{9}$/.test(form.ssn)) {
-      setError('SSN: 9 digits')
+      setError('SSN needs to be 9 digits')
       return
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(form.dob)) {
-      setError('DOB: YYYY-MM-DD')
+      setError('Birth date: use YYYY-MM-DD')
       return
     }
 
@@ -62,53 +61,51 @@ function App() {
       })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(
-          data?.details || data?.error?.message || data?.error || `HTTP ${res.status}`
-        )
+        throw new Error(data?.details || data?.error || 'Request failed')
       }
       setOutcome(String(data.outcome ?? ''))
-      setForm(empty)
-      setShowResult(true)
+      setForm(start)
+      setDone(true)
     } catch (err) {
-      setError(err.message || 'Submit failed')
+      setError(err.message || 'Something went wrong')
     } finally {
       setBusy(false)
     }
   }
 
   const o = outcome.trim()
-  const approved = /^approved$/i.test(o)
-  const manual = /manual\s*review/i.test(o)
-  const denied = /^denied$/i.test(o)
+  const ok = /^approved$/i.test(o)
+  const review = /manual\s*review/i.test(o)
+  const nope = /^denied$/i.test(o)
 
-  if (showResult) {
+  if (done) {
     return (
       <div className="wrap">
         <h1>Vibes-Based Lending Co.</h1>
-        {approved && (
-          <div className="result ok">
-            <p className="big">Success! 🎉🎉🎉</p>
-            <p>Your account is set up.</p>
+        {ok && (
+          <div className="box good">
+            <p className="lead">Success! 🎉🎉🎉</p>
+            <p>Account’s set up.</p>
           </div>
         )}
-        {manual && (
-          <div className="result wait">
-            <p>Thanks for submitting your application, we’ll be in touch shortly.</p>
+        {review && (
+          <div className="box maybe">
+            <p>Thanks — we’ll be in touch.</p>
           </div>
         )}
-        {denied && (
-          <div className="result bad">
-            <p>Sorry, your application was not successful.</p>
+        {nope && (
+          <div className="box bad">
+            <p>Sorry, not approved.</p>
           </div>
         )}
-        {!approved && !manual && !denied && (
-          <div className="result">
-            <p>Outcome: {o || 'Unknown'}</p>
+        {!ok && !review && !nope && (
+          <div className="box">
+            <p>Result: {o || 'Unknown'}</p>
           </div>
         )}
         <p>
-          <button type="button" onClick={() => { setShowResult(false); setOutcome('') }}>
-            New application
+          <button type="button" onClick={() => { setDone(false); setOutcome('') }}>
+            Again
           </button>
         </p>
       </div>
@@ -119,75 +116,58 @@ function App() {
     <div className="wrap">
       <h1>Vibes-Based Lending Co.</h1>
       <form onSubmit={onSubmit}>
-        <p><input name="firstName" value={form.firstName} onChange={onChange} placeholder="First name" required /></p>
-        <p>
-          <input
-            name="lastName"
-            value={form.lastName}
-            onChange={onChange}
-            placeholder="Last name (sandbox: Review or Deny)"
-            required
-          />
-        </p>
-        <p><input name="addressLine1" value={form.addressLine1} onChange={onChange} placeholder="Address line 1" required /></p>
-        <p><input name="addressLine2" value={form.addressLine2} onChange={onChange} placeholder="Address line 2" /></p>
-        <p><input name="city" value={form.city} onChange={onChange} placeholder="City" required /></p>
-        <p>
-          <input
-            name="state"
-            value={form.state}
-            onChange={onChange}
-            placeholder="State"
-            minLength={2}
-            maxLength={2}
-            pattern="[A-Za-z]{2}"
-            required
-          />
-        </p>
-        <p><input name="zip" value={form.zip} onChange={onChange} placeholder="ZIP" required /></p>
-        <p>
-          <input
-            name="country"
-            value={form.country}
-            onChange={onChange}
-            placeholder="Country"
-            minLength={2}
-            maxLength={2}
-            pattern="[A-Za-z]{2}"
-            required
-          />
-        </p>
-        <p>
-          <input
-            name="ssn"
-            value={form.ssn}
-            onChange={onChange}
-            placeholder="SSN"
-            inputMode="numeric"
-            minLength={9}
-            maxLength={9}
-            pattern="\d{9}"
-            required
-          />
-        </p>
-        <p><input name="email" type="email" value={form.email} onChange={onChange} placeholder="Email" required /></p>
-        <p>
-          <input
-            name="dob"
-            value={form.dob}
-            onChange={onChange}
-            placeholder="DOB (YYYY-MM-DD)"
-            inputMode="numeric"
-            maxLength={10}
-            pattern="\d{4}-\d{2}-\d{2}"
-            required
-          />
-        </p>
+        <div className="row">
+          <label>First name <input name="firstName" value={form.firstName} onChange={onChange} required /></label>
+        </div>
+        <div className="row">
+          <label>Last name <input name="lastName" value={form.lastName} onChange={onChange} required /></label>
+          <span className="hint">Sandbox: last name Review → manual review, Deny → denied.</span>
+        </div>
+        <div className="row">
+          <label>Street <input name="addressLine1" value={form.addressLine1} onChange={onChange} required /></label>
+        </div>
+        <div className="row">
+          <label>Line 2 (optional) <input name="addressLine2" value={form.addressLine2} onChange={onChange} /></label>
+        </div>
+        <div className="row">
+          <label>City <input name="city" value={form.city} onChange={onChange} required /></label>
+        </div>
+        <div className="row">
+          <label>State <input name="state" value={form.state} onChange={onChange} minLength={2} maxLength={2} required /></label>
+          <span className="hint">2 letters, e.g. NY. We uppercase for you.</span>
+        </div>
+        <div className="row">
+          <label>ZIP <input name="zip" value={form.zip} onChange={onChange} required /></label>
+        </div>
+        <div className="row">
+          <label>Country <input name="country" value={form.country} onChange={onChange} minLength={2} maxLength={2} required /></label>
+          <span className="hint">2 letters, e.g. US.</span>
+        </div>
+        <div className="row">
+          <label>SSN <input name="ssn" value={form.ssn} onChange={onChange} inputMode="numeric" minLength={9} maxLength={9} required /></label>
+          <span className="hint">9 digits, no dashes.</span>
+        </div>
+        <div className="row">
+          <label>Email <input name="email" type="email" value={form.email} onChange={onChange} required /></label>
+        </div>
+        <div className="row">
+          <label>
+            Birth date{' '}
+            <input
+              name="dob"
+              value={form.dob}
+              onChange={onChange}
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="1990-01-15"
+              required
+            />
+          </label>
+          <span className="hint">YYYY-MM-DD</span>
+        </div>
         <button type="submit" disabled={busy}>{busy ? '…' : 'Submit'}</button>
       </form>
-      {error ? <p className="err">{error}</p> : null}
+      {error && <p className="err">{error}</p>}
     </div>
   )
 }
-
-export default App
