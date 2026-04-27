@@ -15,7 +15,8 @@ const empty = {
   dob: '',
 }
 
-const api = 'http://localhost:3001'
+// Dev: Vite on 5173, API on 3001. Production (e.g. Railway): same host, use relative /api
+const api = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 function App() {
   const [form, setForm] = useState(empty)
