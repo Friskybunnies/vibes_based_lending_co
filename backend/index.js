@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-app.get("/api/message", (req, res) => {
+app.get("/evaluations", (req, res) => {
   res.json({ message: "Hello from Express" });
 });
 
