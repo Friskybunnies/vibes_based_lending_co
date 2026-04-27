@@ -1,14 +1,11 @@
-import "dotenv/config";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import cors from "cors";
-import express from "express";
+require("dotenv").config();
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const path = require("path");
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
-app.use(cors({ origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",").map(s => s.trim()) : true }));
+app.use(cors());
 app.use(express.json());
 
 app.get("/api/health", (req, res) => {
@@ -25,7 +22,7 @@ app.post("/api/evaluations", async (req, res) => {
 
         const t = process.env.WORKFLOW_TOKEN;
         const s = process.env.WORKFLOW_SECRET;
-        const basic = "Basic " + Buffer.from(t + ":" + s).toString("base64");
+        const auth = "Basic " + Buffer.from(t + ":" + s).toString("base64");
 
         const payload = {
             name_first: body.firstName,
@@ -41,20 +38,20 @@ app.post("/api/evaluations", async (req, res) => {
             birth_date: body.dob
         };
 
-        const r = await fetch("https://sandbox.alloy.co/v1/evaluations", {
+        const evaluation = await fetch("https://sandbox.alloy.co/v1/evaluations", {
             method: "POST",
-            headers: { Authorization: basic, "Content-Type": "application/json" },
+            headers: { Authorization: auth, "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
-        if (!r.ok) {
-            return res.status(502).json({ error: "Alloy error", details: await r.text() });
+        if (!evaluation.ok) {
+            return res.status(500).json({ error: "Evaluation error", details: await evaluation.text() });
         }
 
-        const data = await r.json();
-        const raw =
+        const data = await evaluation.json();
+        const contents =
             data.summary?.outcome ?? data.summary?.result ?? data.outcome ?? "Unknown";
-        const outcome = typeof raw === "string" ? raw.trim() : String(raw);
+        const outcome = typeof contents === "string" ? raw.trim() : String(contents);
         res.json({
             id: String(Date.now()),
             formContents: body,
@@ -68,14 +65,13 @@ app.post("/api/evaluations", async (req, res) => {
 });
 
 const dist = path.join(__dirname, "../frontend/dist");
-if (fs.existsSync(path.join(dist, "index.html"))) {
-    app.use(express.static(dist, { index: "index.html" }));
-    app.use((req, res) => {
-        if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
-        if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
-        res.sendFile(path.join(dist, "index.html"));
-    });
-}
+const indexHtml = path.join(dist, "index.html");
+app.use(express.static(dist, { index: "index.html" }));
+app.use((req, res) => {
+    if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
+    if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
+    res.sendFile(indexHtml);
+});
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log("on", port));
