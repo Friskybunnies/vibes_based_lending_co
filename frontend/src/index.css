@@ -1,52 +1,76 @@
 :root {
   color-scheme: dark;
-  --bg: #0c0e12;
-  --surface: #14171f;
-  --surface2: #1c2029;
-  --border: #2d3341;
-  --text: #c8cad0;
-  --text-muted: #8b90a0;
-  --text-h: #f4f4f5;
-  font: 16px/1.45 system-ui, sans-serif;
+  /* near-black + crisp separation */
+  --bg: #020203;
+  --bg-elevated: #08080a;
+  --surface: #0c0c0f;
+  --border: #2a2a2e;
+  --border-bright: #3f3f46;
+  --text: #fafafa;
+  --text-dim: #a1a1aa;
+  --text-muted: #71717a;
+  --ring: #ffffff;
+  --accent: #38bdf8;
+  --accent-dim: #0c4a6e;
+
+  font: 16px/1.5 "Inter", system-ui, -apple-system, sans-serif;
+  font-feature-settings: "ss01" on, "cv02" on;
   color: var(--text);
   background: var(--bg);
+  -webkit-font-smoothing: antialiased;
 }
 
-body { margin: 0; }
+body {
+  margin: 0;
+}
 
 #root {
   min-height: 100svh;
-  padding: 1.5rem 0.5rem;
+  padding: 1.5rem 1rem;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background: var(--bg);
+  /* subtle cool vignette */
+  background:
+    radial-gradient(120% 80% at 50% -20%, rgba(56, 189, 248, 0.12), transparent 50%),
+    var(--bg);
 }
 
 h1 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--text-h);
-  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin: 0 0 1rem;
   text-align: center;
 }
 
-p { margin: 0 0 0.5rem; }
+p {
+  margin: 0 0 0.5rem;
+}
 
 input {
   width: 100%;
   box-sizing: border-box;
   font: inherit;
-  padding: 0.4rem 0.5rem;
-  color: var(--text-h);
-  background: var(--surface2);
+  padding: 0.5rem 0.6rem;
+  color: var(--text);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+input:hover {
+  border-color: var(--border-bright);
 }
 
 input:focus {
-  border-color: #6366f1;
-  outline: none;
+  border-color: var(--accent);
+  outline: 2px solid var(--bg);
+  outline-offset: 0;
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 input::placeholder {
