@@ -44,12 +44,12 @@
   box-sizing: border-box;
   padding: 0 0.5rem;
   text-align: center;
-  margin-top: max(0.65rem, 3.5vh);
+  margin-top: max(1rem, 5vh);
 }
 
 .partner__img {
   display: block;
-  width: 11rem;
+  width: 12rem;
   height: auto;
   aspect-ratio: 1;
   max-width: 100%;
@@ -61,8 +61,8 @@
 }
 
 .partner__caption {
-  margin: 0.5rem 0 0;
-  font-size: 0.75rem;
+  margin: 0.65rem 0 0;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   line-height: 1.3;
@@ -74,7 +74,7 @@
   width: 100%;
   max-width: min(50rem, 100%);
   margin: 0 auto;
-  padding: 0.85rem 1rem 1rem;
+  padding: 1.25rem 1.35rem 1.35rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -89,12 +89,6 @@
   margin-left: 0;
   margin-right: 0;
   width: 100%;
-}
-
-.wrap h1 {
-  font-size: 1.15rem;
-  margin: 0 0 0.55rem;
-  line-height: 1.25;
 }
 
 @media (max-width: 640px) {
@@ -125,34 +119,29 @@
   }
 
   .partner__img {
-    width: 10.25rem;
+    width: 11rem;
   }
 }
 
 .row {
-  margin-bottom: 0.48rem;
-}
-
-.row:last-of-type {
-  margin-bottom: 0.28rem;
+  margin-bottom: 0.8rem;
 }
 
 .row label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-header-secondary);
   text-shadow: 0 0 16px var(--text-header-secondary-glow);
-  margin-bottom: 0.1rem;
-  line-height: 1.2;
+  margin-bottom: 0.15rem;
 }
 
 .row label input {
   display: block;
   width: 100%;
-  margin-top: 0.26rem;
+  margin-top: 0.35rem;
   text-transform: none;
   font-weight: 400;
   letter-spacing: normal;
@@ -162,23 +151,23 @@
 .row .hint,
 .row label i {
   display: block;
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   font-style: normal;
   font-weight: 400;
   text-transform: none;
   letter-spacing: normal;
   color: var(--text-muted);
-  margin-top: 0.2rem;
-  line-height: 1.3;
+  margin-top: 0.35rem;
+  line-height: 1.35;
 }
 
 button[type="submit"] {
   width: 100%;
-  margin-top: 0.28rem;
-  padding: 0.48rem 0.65rem;
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.75rem;
   font: inherit;
   font-weight: 600;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   letter-spacing: 0.02em;
   color: #020203;
   background: #fafafa;
@@ -282,8 +271,8 @@ button[type="button"]:hover {
 
 .err {
   color: #f87171;
-  margin-top: 0.48rem;
-  font-size: 0.82rem;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.01em;
 }

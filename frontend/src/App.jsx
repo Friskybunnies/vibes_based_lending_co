@@ -11,8 +11,8 @@ function Shell({ children }) {
             className="partner__img"
             src={partnerImg}
             alt="Official lending partner"
-            width={176}
-            height={176}
+            width={192}
+            height={192}
           />
           <p className="partner__caption">Your Official Lending Partner</p>
         </aside>
