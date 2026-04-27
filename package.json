@@ -1,0 +1,11 @@
+{
+  "name": "vibes-based-lending-co",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci",
+    "start": "node backend/index.js"
+  }
+}

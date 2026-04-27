@@ -1,11 +1,19 @@
 require("dotenv").config();
 
+const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+app.use(
+    cors({
+        origin: process.env.CORS_ORIGIN
+            ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+            : true
+    })
+);
 app.use(express.json());
 
 const store = [];
@@ -78,7 +86,21 @@ app.get("/api/evaluations", (req, res) => {
     res.json(store);
 });
 
-const PORT = 3001;
+const distPath = path.join(__dirname, "../frontend/dist");
+if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, "index.html"))) {
+    app.use(express.static(distPath, { index: "index.html" }));
+    app.use((req, res) => {
+        if (req.path.startsWith("/api")) {
+            return res.status(404).json({ error: "Not found" });
+        }
+        if (req.method !== "GET" && req.method !== "HEAD") {
+            return res.status(404).end();
+        }
+        res.sendFile(path.join(distPath, "index.html"));
+    });
+}
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Listening on port ${PORT}`);
 });
