@@ -2,21 +2,36 @@ import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
-  const [message, setMessage] = useState("")
+  const [messages, setMessages] = useState([])
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch("http://localhost:3001/evaluations")
+    fetch("http://localhost:3001/api/evaluations")
       .then(res => res.json())
-      .then(data => setMessage(data.message))
-      .catch(error => console.error("Error:", error));
-  }, []);
+      .then(data => setMessages(Array.isArray(data) ? data : []))
+      .catch(err => {
+        console.error("Error:", err)
+        setError('Unable to load results')
+      })
+  }, [])
+
+  const latestMessage = messages[messages.length - 1]
 
   return (
     <div>
-      <h1>Hello World App</h1>
-      <p>{message}</p>
+      <h1>Vibes-Based Lending Co.</h1>
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <>
+          <p>Total messages: {messages.length}</p>
+          <p>
+            Latest outcome: {latestMessage ? latestMessage.outcome : 'No messages yet'}
+          </p>
+        </>
+      )}
     </div>
-  );
+  )
 }
 
 export default App
