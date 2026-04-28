@@ -51,7 +51,7 @@ app.post("/api/evaluations", async (req, res) => {
         const data = await evaluation.json();
         const contents =
             data.summary?.outcome ?? data.summary?.result ?? data.outcome ?? "Unknown";
-        const outcome = typeof contents === "string" ? raw.trim() : String(contents);
+        const outcome = typeof contents === "string" ? contents.trim() : String(contents);
         res.json({
             id: String(Date.now()),
             formContents: body,
@@ -74,8 +74,8 @@ const dist = path.join(__dirname, "../frontend/dist");
 const indexHtml = path.join(dist, "index.html");
 app.use(express.static(dist, { index: "index.html" }));
 app.use((req, res) => {
-    // if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
-    // if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
+    if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
+    if (req.method !== "GET" && req.method !== "HEAD") return res.status(404).end();
     res.sendFile(indexHtml);
 });
 
