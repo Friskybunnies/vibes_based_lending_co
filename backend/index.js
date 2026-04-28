@@ -56,7 +56,7 @@ app.post("/api/evaluations", async (req, res) => {
         }
 
         if (!evaluation.ok) {
-            return res.status(500).json({ error: "Evaluation error", details: await evaluation.text() });
+            return res.status(502).json({ error: "Evaluation error", details: await evaluation.text() });
         }
 
         const data = await evaluation.json();
