@@ -2,15 +2,14 @@ import { useState } from 'react'
 import './App.css'
 import partnerImg from './static/official-lender.png'
 
-function Shell({ children }) {
+function PageOutline({ children }) {
   return (
     <div className="app-layout">
       <div className="partner-gutter">
-        <aside className="partner" aria-label="Partner">
+        <aside className="partner">
           <img
             className="partner__img"
             src={partnerImg}
-            alt="Official lending partner"
             width={192}
             height={192}
           />
@@ -18,187 +17,173 @@ function Shell({ children }) {
         </aside>
       </div>
       <div className="app-layout__main">{children}</div>
-      <div className="layout-spacer" aria-hidden="true" />
+      <div className="layout-spacer" />
     </div>
   )
 }
 
-const start = {
-  firstName: '',
-  lastName: '',
-  addressLine1: '',
-  addressLine2: '',
-  city: '',
-  state: '',
-  zip: '',
-  country: '',
-  ssn: '',
-  email: '',
-  dob: '',
-}
-
 const api = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
+function formInputsTranslation(formInputs) {
+  const trim = (input) => String(formInputs.get(input) ?? '').trim()
+  return {
+    firstName: trim('firstName'),
+    lastName: trim('lastName'),
+    addressLine1: trim('addressLine1'),
+    addressLine2: trim('addressLine2'),
+    city: trim('city'),
+    state: trim('state').toUpperCase(),
+    zip: trim('zip'),
+    country: trim('country').toUpperCase(),
+    ssn: String(formInputs.get('ssn') ?? '').replace(/\D/g, ''),
+    email: trim('email'),
+    dob: String(formInputs.get('dob') ?? '').replace(/[^\d-]/g, '').slice(0, 10),
+  }
+}
+
 export default function App() {
-  const [form, setForm] = useState(start)
   const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
   const [outcome, setOutcome] = useState('')
-
-  function onChange(e) {
-    const { name, value } = e.target
-    let v = value
-    if (name === 'state') v = value.toUpperCase()
-    if (name === 'dob') v = value.replace(/[^\d-]/g, '').slice(0, 10)
-    setForm(f => ({ ...f, [name]: v }))
-  }
+  const [formKey, setFormKey] = useState(0)
 
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
-    if (!/^[A-Za-z]{2}$/.test(form.state)) {
-      setError('State should be 2 letters (like NY)')
+    const formData = formInputsTranslation(new FormData(e.currentTarget))
+
+    if (!/^[A-Za-z]{2}$/.test(formData.state)) {
+      setError('State should be two letters')
       return
     }
-    if (form.country !== 'US') {
-      setError('Country must be US')
+    if (formData.country !== 'US') {
+      setError('Country must be "US"')
       return
     }
-    if (!/^\d{9}$/.test(form.ssn)) {
-      setError('SSN needs to be 9 digits')
+    if (!/^\d{9}$/.test(formData.ssn)) {
+      setError('SSN should be nine digits')
       return
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.dob)) {
-      setError('Birth date: use YYYY-MM-DD')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.dob)) {
+      setError('Please use "YYYY-MM-DD" format')
       return
     }
 
-    setBusy(true)
     try {
       const res = await fetch(`${api}/api/evaluations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       })
-      const data = await res.json().catch(() => null)
+      const responseData = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(data?.details || data?.error || 'Request failed')
+        throw new Error(responseData?.details || responseData?.error || 'Request failed')
       }
-      setOutcome(String(data.outcome ?? ''))
-      setForm(start)
+      setOutcome(String(responseData.outcome ?? ''))
       setDone(true)
     } catch (err) {
       setError(err.message || 'Something went wrong')
-    } finally {
-      setBusy(false)
     }
   }
 
-  const o = outcome.trim()
-  const ok = o === 'Approved'
-  const review = o === 'Manual Review'
-  const nope = o === 'Denied'
+  const status = outcome.trim()
+  const approved = status === 'Approved'
+  const manual_review = status === 'Manual Review'
+  const denied = status === 'Denied'
 
   if (done) {
     return (
-      <Shell>
-        <div className="wrap">
+      <PageOutline>
+        <div className="application-card">
           <h1>Vibes-Based Lending Co.</h1>
-          {ok && (
+          {approved && (
             <div className="box good">
-              <p className="lead">Success! 🎉🎉🎉</p>
+              <p className="outcome-heading">Success! 🎉🎉🎉</p>
               <p>
                 You’ve successfully created an account with our service.
               </p>
             </div>
           )}
-          {review && (
+          {manual_review && (
             <div className="box maybe">
               <p>
                 Thanks for submitting your application, we’ll be in touch shortly.
               </p>
             </div>
           )}
-          {nope && (
+          {denied && (
             <div className="box bad">
               <p>Sorry, your application was not successful.</p>
             </div>
           )}
-          {!ok && !review && !nope && (
+          {!approved && !manual_review && !denied && (
             <div className="box">
-              <p>Result: {o || 'Unknown'}</p>
+              <p>Result: {status || 'Unknown'}</p>
             </div>
           )}
           <p>
-            <button type="button" onClick={() => { setDone(false); setOutcome('') }}>
-              Again
+            <button
+              type="button"
+              onClick={() => {
+                setDone(false)
+                setOutcome('')
+                setFormKey((k) => k + 1)
+              }}
+            >
+              Submit again
             </button>
           </p>
         </div>
-      </Shell>
+      </PageOutline>
     )
   }
 
   return (
-    <Shell>
-      <div className="wrap">
+    <PageOutline>
+      <div className="application-card">
         <h1>Vibes-Based Lending Co.</h1>
-        <form onSubmit={onSubmit}>
+        <form key={formKey} onSubmit={onSubmit}>
           <div className="row">
-            <label>First name <input name="firstName" value={form.firstName} onChange={onChange} required /></label>
+            <label>First name <input name="firstName" required /></label>
           </div>
           <div className="row">
-            <label>Last name <input name="lastName" value={form.lastName} onChange={onChange} required /></label>
+            <label>Last name <input name="lastName" required /></label>
           </div>
           <div className="row">
-            <label>Line 1 <input name="addressLine1" value={form.addressLine1} onChange={onChange} required /></label>
+            <label>Line 1 <input name="addressLine1" required /></label>
           </div>
           <div className="row">
-            <label>Line 2 <input name="addressLine2" value={form.addressLine2} onChange={onChange} /></label>
+            <label>Line 2 <input name="addressLine2" /></label>
           </div>
           <div className="row">
-            <label>City <input name="city" value={form.city} onChange={onChange} required /></label>
+            <label>City <input name="city" required /></label>
           </div>
           <div className="row">
-            <label>State <input name="state" value={form.state} onChange={onChange} minLength={2} maxLength={2} required /></label>
-            <span className="hint">2 letters, e.g. NY.</span>
+            <label>State <input name="state" minLength={2} maxLength={2} required /></label>
+            <span className="hint">State should be two letters.</span>
           </div>
           <div className="row">
-            <label>ZIP <input name="zip" value={form.zip} onChange={onChange} required /></label>
+            <label>ZIP <input name="zip" required /></label>
           </div>
           <div className="row">
-            <label>
-              Country
-              <input name="country" value={form.country} onChange={onChange} required />
-            </label>
-            <span className="hint">Must be US.</span>
+            <label>Country <input name="country" minLength={2} maxLength={2} required /></label>
+            <span className="hint">Country must be "US".</span>
           </div>
           <div className="row">
-            <label>SSN <input name="ssn" value={form.ssn} onChange={onChange} inputMode="numeric" minLength={9} maxLength={9} required /></label>
-            <span className="hint">9 digits, no dashes.</span>
+            <label>SSN <input name="ssn" inputMode="numeric" minLength={9} maxLength={9} required /></label>
+            <span className="hint">SSN should be nine digits.</span>
           </div>
           <div className="row">
-            <label>Email Address <input name="email" type="email" value={form.email} onChange={onChange} required /></label>
+            <label>Email Address <input name="email" type="email" required /></label>
           </div>
           <div className="row">
-            <label>
-              Date of Birth
-              <input
-                name="dob"
-                value={form.dob}
-                onChange={onChange}
-                inputMode="numeric"
-                maxLength={10}
-                required
-              />
-            </label>
+            <label>Date of Birth <input name="dob" inputMode="numeric" maxLength={10} required /></label>
             <span className="hint">YYYY-MM-DD</span>
           </div>
-          <button type="submit" disabled={busy}>{busy ? '…' : 'Submit'}</button>
+          <button type="submit">Submit</button>
         </form>
         {error && <p className="err">{error}</p>}
       </div>
-    </Shell>
+    </PageOutline>
   )
 }

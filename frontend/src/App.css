@@ -1,14 +1,17 @@
+/* 
+
+Styles are for this project are generated and refined via prompts.
+
+*/
+
 .app-layout {
   --layout-col-gap: 1.25rem;
   display: flex;
-  flex-wrap: nowrap;
   align-items: flex-start;
   justify-content: center;
   gap: var(--layout-col-gap);
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  box-sizing: border-box;
 }
 
 .partner-gutter {
@@ -21,7 +24,6 @@
 
 .app-layout__main {
   flex: 0 0 auto;
-  box-sizing: border-box;
   width: min(
     50rem,
     calc(100vw - 2 * max(0.75rem, 2vw) - 3rem)
@@ -67,7 +69,7 @@
   color: var(--text-heading);
 }
 
-.wrap {
+.application-card {
   position: relative;
   width: 100%;
   max-width: min(50rem, 100%);
@@ -82,7 +84,7 @@
     0 24px 48px -20px rgba(0, 0, 0, 0.85);
 }
 
-.app-layout .wrap {
+.app-layout .application-card {
   max-width: none;
   margin-left: 0;
   margin-right: 0;
@@ -235,7 +237,7 @@ button[type="button"]:hover {
   box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.12) inset;
 }
 
-.lead {
+.outcome-heading {
   font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -243,27 +245,23 @@ button[type="button"]:hover {
   color: var(--text);
 }
 
-.box.good .lead {
+.box.good .outcome-heading {
   color: #86efac;
 }
 
-.box.maybe .lead,
+.box.maybe .outcome-heading,
 .box.maybe p {
   color: #fde047;
 }
 
 .box.bad p,
-.box.bad .lead {
+.box.bad .outcome-heading {
   color: #fecaca;
 }
 
 .box p {
   margin: 0;
   line-height: 1.4;
-  color: var(--text-dim);
-}
-
-.box.good p:not(.lead) {
   color: var(--text-dim);
 }
 
