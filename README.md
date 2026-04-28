@@ -1,12 +1,16 @@
 # Vibes-Based Lending Co.
 
-React (Vite) + Express. Alloy **sandbox** for evaluations. In production, one process serves the built UI and `/api/*`.
+Purpose: A simple form for getting that ca$$h moneyyyyy (if the lender [me] feels like it 💅)
 
-**Node 20+**
+Technologies: React, Vite, Express.
+
+Details: With current configuration, UI and API are served by two separate processes in dev and a single process in production.
 
 ## Local
 
-**`backend/.env`:** `WORKFLOW_TOKEN` and `WORKFLOW_SECRET` (or evaluations fail). Optional `PORT` (default `3001`).
+**Node 20+**
+
+Set env vars `WORKFLOW_TOKEN` and `WORKFLOW_SECRET` in **`backend/.env`**. (Optional `PORT`; otherwise, default `3001`.)
 
 ```bash
 # terminal 1
@@ -16,15 +20,8 @@ cd backend && npm install && node index.js
 cd frontend && npm install && npm run dev
 ```
 
-Open **http://localhost:5173**; the API is **:3001**. Override the API with `VITE_API_URL` in `frontend/.env` if you need to (see `frontend/.env.example`). **Country** is fixed to **US**.
-
-**Built UI only:** `cd frontend && npm run build`, then from the repo root `node backend/index.js` (same env as above; serves on `PORT` or 3001).
+Visit the app in the browser at **http://localhost:5173**.
 
 ## Railway
 
-- **Docker:** use the repo root + root **Dockerfile**; set **`WORKFLOW_TOKEN`** and **`WORKFLOW_SECRET`** in Variables.
-- **No Docker:** set service root to **`backend`**, build  
-  `cd ../frontend && npm ci && npm run build && cd ../backend && npm ci`,  
-  start **`node index.js`**.
-
-Same-origin in production — you normally omit **`CORS_ORIGIN`** and **`VITE_API_URL`**.
+- Use the repo root **Dockerfile**; set **`WORKFLOW_TOKEN`** and **`WORKFLOW_SECRET`** in Railway Variables.
