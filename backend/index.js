@@ -41,33 +41,24 @@ app.post("/api/evaluations", async (req, res) => {
             birth_date: body.dob
         };
 
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        let evaluation;
-        try {
-            evaluation = await fetch("https://sandbox.alloy.co/v1/evaluations", {
-                method: "POST",
-                headers: { Authorization: auth, "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-                signal: controller.signal
-            });
-        } finally {
-            clearTimeout(timeout);
-        }
+        const evaluation = await fetch("https://sandbox.alloy.co/v1/evaluations", {
+            method: "POST",
+            headers: { Authorization: auth, "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
         if (!evaluation.ok) {
             return res.status(502).json({ error: "Evaluation error", details: await evaluation.text() });
         }
 
         const data = await evaluation.json();
-        const contents =
-            data.summary?.outcome ?? data.summary?.result ?? data.outcome ?? "Unknown";
+        const contents = data.summary?.outcome ?? data.summary?.result ?? data.outcome ?? "Unknown";
         const outcome = typeof contents === "string" ? contents.trim() : String(contents);
         res.json({
             id: String(Date.now()),
             formContents: body,
             outcome,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toISOString()
         });
     } catch (err) {
         console.error(err);
