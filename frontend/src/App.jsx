@@ -181,7 +181,7 @@ export default function App() {
             <label>Email Address <input name="email" type="email" required /></label>
           </div>
           <div className="row">
-            <label>Date of Birth <input name="dob" inputMode="numeric" maxLength={10} required /></label>
+            <label>Date of Birth <input name="dob" inputMode="text" maxLength={10} required /></label>
             <span className="hint">YYYY-MM-DD</span>
           </div>
           <button type="submit" disabled={busy}>{busy ? 'Submitting...' : 'Submit'}</button>
