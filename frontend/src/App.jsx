@@ -43,6 +43,7 @@ function formInputsTranslation(formInputs) {
 
 export default function App() {
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
   const [outcome, setOutcome] = useState('')
   const [formKey, setFormKey] = useState(0)
@@ -69,6 +70,7 @@ export default function App() {
       return
     }
 
+    setBusy(true)
     try {
       const res = await fetch(`${api}/api/evaluations`, {
         method: 'POST',
@@ -83,6 +85,8 @@ export default function App() {
       setDone(true)
     } catch (err) {
       setError(err.message || 'Something went wrong')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -180,7 +184,7 @@ export default function App() {
             <label>Date of Birth <input name="dob" inputMode="numeric" maxLength={10} required /></label>
             <span className="hint">YYYY-MM-DD</span>
           </div>
-          <button type="submit">Submit</button>
+          <button type="submit" disabled={busy}>{busy ? 'Submitting...' : 'Submit'}</button>
         </form>
         {error && <p className="err">{error}</p>}
       </div>

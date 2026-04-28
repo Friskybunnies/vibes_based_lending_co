@@ -22,6 +22,9 @@ app.post("/api/evaluations", async (req, res) => {
 
         const t = process.env.WORKFLOW_TOKEN;
         const s = process.env.WORKFLOW_SECRET;
+        if (!t || !s) {
+            return res.status(500).json({ error: "Server misconfigured: missing WORKFLOW_TOKEN or WORKFLOW_SECRET" });
+        }
         const auth = "Basic " + Buffer.from(t + ":" + s).toString("base64");
 
         const payload = {
@@ -38,11 +41,19 @@ app.post("/api/evaluations", async (req, res) => {
             birth_date: body.dob
         };
 
-        const evaluation = await fetch("https://sandbox.alloy.co/v1/evaluations", {
-            method: "POST",
-            headers: { Authorization: auth, "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        let evaluation;
+        try {
+            evaluation = await fetch("https://sandbox.alloy.co/v1/evaluations", {
+                method: "POST",
+                headers: { Authorization: auth, "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+        } finally {
+            clearTimeout(timeout);
+        }
 
         if (!evaluation.ok) {
             return res.status(500).json({ error: "Evaluation error", details: await evaluation.text() });
